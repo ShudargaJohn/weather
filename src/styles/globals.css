@@ -2,7 +2,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  /* --foreground: #171717; */
 }
 
 @theme inline {
@@ -14,7 +14,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    /* --background: #0a0a0a; */
     --foreground: #ededed;
   }
 }
@@ -23,4 +23,36 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+.search-shadow {
+  box-shadow: 0px 12px 24px 0px rgba(0, 0, 0, 0.06);
+}
+.temp-color {
+  background: linear-gradient(180deg, #111827 0%, #6b7280 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.unique-bg {
+  background: linear-gradient(180deg, #1f2937 0%, rgba(17, 24, 39, 0) 100%);
+}
+.night-temp-color {
+  background: var(
+    --Cool-Gray-Gradient-light,
+    linear-gradient(180deg, #f9fafb 0%, rgba(249, 250, 251, 0) 100%)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.first-circle {
+  border-radius: 340px;
+  border-width: 1px;
+  border-style: solid;
+  border-left-color: #000000;
+  border-right-color: #ffffff;
+
+  opacity: 0.1;
+  width: 340px;
+  height: 340px;
 }
