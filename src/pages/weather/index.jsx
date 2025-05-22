@@ -19,21 +19,61 @@ import { FifthCircleBlack } from "../components/fifth-circle-black";
 import { SixthCircleBlack } from "../components/sixth-circle-black";
 import { useEffect, useState } from "react";
 
+const weatherApiKey = "899d9c2c0f5845838dc70138240912";
+
 export default function Home() {
+  const [countries, setCountries] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
   const [weather, setWeather] = useState({});
-  const [input, setInput] = useState("London");
-  const [city, setCity] = useState("London");
-  const weatherApiKey = "b48e5f3c5d9a9ebf1feecc556a34a659";
+  const [filteredCities, setFilteredCities] = useState([]);
+  const [selectedCity, setSelectedCity] = useState("Ulan bator");
+
   useEffect(() => {
-    let url = ` https://api.openweathermap.org/data/2.5/weather?q=London&appid=${weatherApiKey}&units=metric`;
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => setWeather(data.list[0].main));
-  }, [city]);
-  const changeCity = (e) => {
-    e.preventDefault();
-    setCity(input);
+    fetchCountriesData();
+  }, []);
+
+  useEffect(() => {
+    fetchWeatherData();
+  }, [selectedCity]);
+
+  useEffect(() => {
+    let searchResults = [];
+
+    countries?.map((country) => {
+      return country?.cities?.map((city) => {
+        if (city.toLowerCase().includes(searchValue)) {
+          searchResults.push({ name: city, country: country.country });
+        }
+      });
+    });
+
+    setFilteredCities(searchResults.slice(0, 5));
+  }, [searchValue]);
+
+  const fetchCountriesData = () => {
+    fetch("https://countriesnow.space/api/v0.1/countries")
+      .then((response) => response.json())
+      .then((data) => {
+        setCountries(data.data);
+      });
   };
+
+  const fetchWeatherData = () => {
+    fetch(
+      `https://api.weatherapi.com/v1/forecast.json?key=${weatherApiKey}&q=${selectedCity}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setWeather(data);
+        console.log(data.forecast);
+      });
+  };
+
+  const handleCityClick = (cityName) => {
+    setSelectedCity(cityName);
+  };
+  console.log(weather);
+
   return (
     <div className=" flex justify-center relative ">
       <Pinecone />
@@ -47,32 +87,46 @@ export default function Home() {
         <FifthCircle />
         <SixthCircle />
 
-        <div className="z-10 flex justify-center  items-center h-[100%] ">
-          <form
-            onSubmit={(e) => changeCity(e)}
-            className=" flex z-10 absolute bg-[#FFFFFF] rounded-[48px] search-shadow border-none h-[80px] items-center justify-center top-[48px] left-[5%]"
-          >
+        <div className="z-50 flex justify-center  items-center h-[100%] ">
+          <div className=" flex z-50 absolute bg-[#FFFFFF] rounded-[48px] search-shadow border-none h-[80px] items-center justify-center top-[48px] left-[5%]">
             <div className=" h-[44px] flex justify-center gap-[16px] ">
               <Search />
               <input
                 type="text"
                 placeholder="Search"
                 className=" font-bold text-[32px] text-black outline-0 opacity-[0.2] w-[75%]"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(event) =>
+                  setSearchValue(event.target.value.toLowerCase())
+                }
+                value={searchValue}
               />
-              <button type="submit">Enter</button>
+              {searchValue !== "" && (
+                <div className="w-[587px] flex flex-col z-50  p-4 absolute top-[100px] left-0 bg-[#ffffff] rounded-[48px] shadow-sm gap-2">
+                  {filteredCities.map((city) => {
+                    return (
+                      <div
+                        key={city.name + city.country}
+                        className="hover:bg-[#9b9b9b]   cursor-pointer font-bold text-[32px] "
+                        onClick={() => handleCityClick(city.name)}
+                      >
+                        {city.name}, {city.country}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          </form>
-          <div className="day-time h-[832px] w-[414px] bg-[#FFFFFFBF] rounded-[48px] flex flex-col z-50 absolute justify-center  items-center  transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2  ">
+          </div>
+
+          <div className="day-time h-[832px] w-[414px] bg-[#FFFFFFBF] rounded-[48px] flex flex-col z-10 absolute justify-center  items-center  transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2  ">
             <div className="w-[100%] flex justify-center flex-col items-center p-[56px]">
               <div className="location flex justify-between w-[90%]">
                 <div>
                   <p className=" font-[Manrope] text-[18px] font-medium text-[#9CA3AF]">
-                    Date
+                    {weather?.forecast?.forecastday[0].date}
                   </p>
-                  <p className=" font-[Manrope] text-[48px] font-extrabold text-[#111827]">
-                    City
+                  <p className=" font-[Manrope] h-[72px] text-[48px] font-extrabold text-[#111827]">
+                    {weather?.location?.name}
                   </p>
                 </div>
                 <Location />
@@ -87,10 +141,10 @@ export default function Home() {
             <div className="w-[100%] flex flex-col items-center">
               <div className="w-[80%]">
                 <p className=" text-[144px] font-extrabold temp-color">
-                  {weather.temp}°
+                  {weather?.forecast?.forecastday[0].hour[14].temp_c}°
                 </p>
                 <p className=" text-[#FF8E27] font-[Manrope] text-[24px] font-extrabold">
-                  Status
+                  {weather?.forecast?.forecastday[0].hour[14].condition.text}
                 </p>
               </div>
               <div className="flex w-[80%] justify-between mt-[48px]">
@@ -114,13 +168,13 @@ export default function Home() {
         <div className="z-50 absolute flex justify-center  items-center h-[100%] transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 ">
           <div className="night-time h-[832px] w-[414px]  backdrop-blur-md  rounded-[48px] flex flex-col unique-bg border-[8px] border-[#111827]">
             <div className="w-[100%] flex justify-center flex-col items-center p-[56px]">
-              <div className="location flex justify-between w-[90%]">
+              <div className="location flex justify-between w-[95%]">
                 <div>
                   <p className=" font-[Manrope] text-[18px] font-medium text-[#9CA3AF]">
-                    Date
+                    {weather?.forecast?.forecastday[0].date}
                   </p>
-                  <p className=" font-[Manrope] text-[48px] font-extrabold text-white">
-                    City
+                  <p className=" font-[Manrope] h-[72px] text-[48px] font-extrabold text-white">
+                    {weather?.location?.name}
                   </p>
                 </div>
                 <Location />
@@ -133,12 +187,12 @@ export default function Home() {
             </div>
 
             <div className="w-[100%] flex flex-col items-center">
-              <div className="w-[80%]">
+              <div className="w-[85%]">
                 <p className=" text-[144px] font-extrabold night-temp-color">
-                  26°
+                  {weather?.forecast?.forecastday[0].hour[5].temp_c}°
                 </p>
                 <p className=" text-[#777CCE] font-[Manrope] text-[24px] font-extrabold">
-                  Status
+                  {weather?.forecast?.forecastday[0].hour[5].condition.text}
                 </p>
               </div>
               <div className="flex w-[80%] justify-between mt-[48px]">
