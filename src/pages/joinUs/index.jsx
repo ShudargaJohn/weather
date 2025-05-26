@@ -1,5 +1,5 @@
-import JoinUsButton from "../components/joinUsButton";
-import JoinUsInput from "../components/joinUsInput";
+import JoinUsButton from "../../components/joinUsButton";
+import JoinUsInput from "../../components/joinUsInput";
 
 const JoinUs = () => {
   return (
